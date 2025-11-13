@@ -1,12 +1,14 @@
 package com.SilverSorgo.ChatBot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
 @Service //Es para que Spring la haga funcionar cuando arranque el bot así está lista para cuando se la necesite
@@ -17,10 +19,12 @@ public class MenuService {
     @PostConstruct //Es para que ejecute el metodo cargarMenu() UNA SOLA VEZ
     public void cargarMenu() { //Es la encargada de leer el archivo json con todo el menú
         try {
-            File file = ResourceUtils.getFile("classpath:menu.json");
-            ObjectMapper mapper = new ObjectMapper();
-            menu = mapper.readValue(file, Menu.class);
-            System.out.println(">>> ¡Menú cargado! Local: " + menu.getNombreLocal()); //Con esta linea sé si se pudo cargar el menú o no
+            ClassPathResource resource = new ClassPathResource("menu.json");
+            try (InputStream inputStream = resource.getInputStream()) {
+                ObjectMapper mapper = new ObjectMapper();
+                menu = mapper.readValue(inputStream, Menu.class);
+                System.out.println(">>> ¡Menú cargado! Local: " + menu.getNombreLocal()); //Con esta linea sé si se pudo cargar el menú o no
+            }
         } catch (IOException e) {
             System.err.println("!!! ERROR AL CARGAR EL menu.json !!!");
             throw new RuntimeException("No se pudo cargar el menú.", e);
