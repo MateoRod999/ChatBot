@@ -1,5 +1,5 @@
 
-FROM openjdk:21-jdk
+FROM openjdk:21-oracle
 
 WORKDIR /app
 
