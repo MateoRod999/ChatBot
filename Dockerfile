@@ -1,5 +1,5 @@
 
-FROM eclipse-temurin:21-jre-focal
+FROM openjdk:21
 
 WORKDIR /app
 
