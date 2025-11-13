@@ -1,5 +1,5 @@
 
-FROM openjdk:21-oracle
+FROM eclipse-temurin:21
 
 WORKDIR /app
 
