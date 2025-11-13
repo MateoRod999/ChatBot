@@ -1,0 +1,125 @@
+{
+  "nombreLocal": "Charly Burguer",
+  "categorias": [
+    {
+      "nombre": "🍔 Hamburguesas Simples",
+      "id": "simples",
+      "descripcion": "Todas las hamburguesas vienen con papas fritas.",
+      "productos": [
+        {
+          "id": "HAM001",
+          "nombre": "The Charly Classic",
+          "descripcion": "Carne, Queso Tybo, Tomate, Lechuga, Pepino.",
+          "precio": 6900.0
+        },
+        {
+          "id": "HAM002",
+          "nombre": "Charly Chesse",
+          "descripcion": "Carne, Cheddar, Panceta.",
+          "precio": 7000.0
+        },
+        {
+          "id": "HAM003",
+          "nombre": "The Heavy Charly",
+          "descripcion": "Carne, Cheddar, Panceta, Cebolla Caramelizada, Huevo.",
+          "precio": 7200.0
+        },
+        {
+          "id": "HAM004",
+          "nombre": "Oklahoma",
+          "descripcion": "Carne, Cheddar, Cebolla Caramelizada.",
+          "precio": 6800.0
+        }
+      ]
+    },
+    {
+      "nombre": "🍔🍔 Hamburguesas Dobles",
+      "id": "dobles",
+      "descripcion": "¡Doble carne! Todas vienen con papas fritas.",
+      "productos": [
+        {
+          "id": "HAM005",
+          "nombre": "American Charly",
+          "descripcion": "Doble Carne, Cheddar, Panceta.",
+          "precio": 7700.0
+        },
+        {
+          "id": "HAM006",
+          "nombre": "Charly Onion",
+          "descripcion": "Doble Carne, Cheddar, Cebolla en Cubos, Ketchup.",
+          "precio": 7700.0
+        },
+        {
+          "id": "HAM007",
+          "nombre": "Qué Miras Bobo",
+          "descripcion": "Doble Carne, Cheddar, Tomate, Panceta, Pepino.",
+          "precio": 7800.0
+        }
+      ]
+    },
+    {
+      "nombre": "🍔🍔🍔 Hamburguesas Triples",
+      "id": "triples",
+      "descripcion": "¡SUPER! Todas vienen con papas fritas.",
+      "productos": [
+        {
+          "id": "HAM008",
+          "nombre": "USA",
+          "descripcion": "Triple Carne, Cheddar, Triple Panceta.",
+          "precio": 8200.0
+        },
+        {
+          "id": "HAM009",
+          "nombre": "Big C",
+          "descripcion": "Triple Carne, Triple Cheddar.",
+          "precio": 8000.0
+        }
+      ]
+    },
+    {
+      "nombre": "🍔🍔🍔🍔 Hamburguesas Cuádruple",
+      "id": "cuadruple",
+      "descripcion": "¡Una bestia! Todas vienen con papas fritas.",
+      "productos": [
+        {
+          "id": "HAM010",
+          "nombre": "Texas",
+          "descripcion": "Cuádruple Carne, Cheddar, Panceta, Cebolla Caramelizada, BBQ.",
+          "precio": 8600.0
+        }
+      ]
+    },
+    {
+      "nombre": "🥤 Bebidas",
+      "id": "bebidas",
+      "descripcion": "Para acompañar.",
+      "productos": [
+        {
+          "id": "BEB001",
+          "nombre": "Coca Cola",
+          "descripcion": "1.5L",
+          "precio": 2500
+        },
+        {
+          "id": "BEB002",
+          "nombre": "Coca Cola Light",
+          "descripcion": "1.5L.",
+          "precio": 2500
+
+        },
+        {
+          "id": "BEB003",
+          "nombre": "Fanta",
+          "descripcion": "1.5L.",
+          "precio": 2500
+        },
+        {
+          "id": "BEB004",
+          "nombre": "Cerveza Norte",
+          "descripcion": "1L.",
+          "precio": 1800
+        }
+      ]
+    }
+  ]
+}
