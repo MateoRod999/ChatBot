@@ -19,4 +19,4 @@ RUN ls -la target/
 
 EXPOSE 8080
 
-CMD["sh", "-c", "java -jar target/*.jar"]
+CMD ["sh", "-c", "java -jar target/*.jar"]
