@@ -7,6 +7,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -141,22 +142,43 @@ public class TelegramBot extends TelegramLongPollingBot {
         logUpdate(update); // Arranco el logueador
 
         try {
-            // Primero se fija si es una foto
-            if (update.hasMessage() && update.getMessage().hasPhoto()) {
-                handlePhotoMessage(update);
+            if (!update.hasMessage()) {
+                if (update.hasCallbackQuery()) {
+                    handleCallbackQuery(update);
+                }
+                return;
+            }
 
-                // Si no es foto, se fija si es un mensaje de texto
-            } else if (update.hasMessage() && update.getMessage().hasText()) {
+            Message message = update.getMessage();
+            Long chatId = message.getChatId();
+            String currentState = userStates.get(chatId);
+
+            if ("AWAITING_COMPROBANTE".equals(currentState)) {
+
+                if (message.hasPhoto()) {
+
+                    handlePhotoMessage(update);
+                    return;
+
+                } else {
+
+                    enviarRespuesta(chatId, "❌ ¡Ojo! Estamos esperando tu comprobante. Por favor, **envía únicamente la imagen** de la transferencia.");
+                    return;
+                }
+            }
+
+            if (message.hasPhoto()) {
+                handlePhotoMessage(update);
+            } else if (message.hasText()) {
                 handleTextMessage(update);
 
-                // Y si no es ninguno, se fija si es un boton
-            } else if (update.hasCallbackQuery()) {
-                handleCallbackQuery(update);
+            } else {
+                enviarRespuesta(chatId, "🤔 Solo puedo procesar comandos o mensajes de texto/fotos. Si quieres hacer un pedido, usa /realizar_pedido.");
             }
-            // (Si no es nada de eso, no hace nada)
 
         } catch (Exception e) {
-            // Ante cualquier excepcion
+            // En un entorno productivo, aquí deberías loguear la excepción a un servicio externo.
+            System.err.println("Error no controlado en onUpdateReceived: " + e.getMessage());
         }
     }
 
