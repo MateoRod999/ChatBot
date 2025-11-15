@@ -177,7 +177,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
 
         } catch (Exception e) {
-            // En un entorno productivo, aquí deberías loguear la excepción a un servicio externo.
             System.err.println("Error no controlado en onUpdateReceived: " + e.getMessage());
         }
     }
@@ -260,30 +259,27 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         String currentState = userStates.get(chatId);
         if ("AWAITING_ADDRESS".equals(currentState)) {
-            // ¡RECIBIMOS LA DIRECCIÓN!
-            // Ya no finalizamos el pedido.
-            userStates.remove(chatId); // Limpiamos estado de dirección
 
-            // Iniciamos el proceso de PAGO
+            userStates.remove(chatId);
+
+
             iniciarProcesoDePago(chatId, messageText);
 
             return;
 
         } else if ("AWAITING_CASH_AMOUNT".equals(currentState)) {
-            // ¡RECIBIMOS CON CUÁNTO PAGA!
-            userStates.remove(chatId); // Limpiamos estado de efectivo
 
-            // Recuperamos el pedido "en proceso"
+            userStates.remove(chatId);
+
             Pedido pedido = pedidosEnProceso.get(chatId);
             if (pedido == null) {
                 enviarRespuesta(chatId, "Ups, hubo un error. Por favor, inicia tu pedido de nuevo con /realizar_pedido");
                 return;
             }
 
-            // Seteamos el método de pago
+
             pedido.setMetodoDePago("Efectivo (Abona con: $" + messageText + ")");
 
-            // AHORA SÍ, finalizamos el pedido
             finalizarPedido(pedido);
 
             return;
@@ -394,7 +390,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 cartService.clearCart(chatId);
                 userStates.put(chatId, "AWAITING_NAME");
 
-                // Editamos el mensaje del carrito
                 var message = update.getCallbackQuery().getMessage();
                 EditMessageText msg = new EditMessageText();
                 msg.setChatId(String.valueOf(chatId));
@@ -412,17 +407,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 break;
 
             case "PAY_TRANSFER":
-                // --- ¡LÓGICA NUEVA! ---
                 Pedido pedidoTransfer = pedidosEnProceso.get(chatId);
                 if (pedidoTransfer == null) {
                     enviarRespuesta(chatId, "Hubo un error, por favor empieza de nuevo.");
                     return;
                 }
 
-                // 1. Ponemos al usuario en el estado de espera
                 userStates.put(chatId, "AWAITING_COMPROBANTE");
 
-                // 2. Le mandamos los datos de pago
                 enviarRespuesta(chatId, String.format(
                         """
                         ¡Perfecto! El total es $%.2f.
@@ -457,32 +449,25 @@ public class TelegramBot extends TelegramLongPollingBot {
                 break;
         }
     }
-// En TelegramBot.java (MÉTODO NUEVO)
-
-    /**
-     * Maneja TODOS los mensajes que contienen una foto.
-     */
     private void handlePhotoMessage(Update update) {
         long chatId = update.getMessage().getChatId();
 
-        // Chequeamos el estado del usuario
+
         String currentState = userStates.get(chatId);
 
         if ("AWAITING_COMPROBANTE".equals(currentState)) {
-            // ¡BINGO! Es el comprobante que esperábamos.
+
             userStates.remove(chatId); // Limpiamos el estado
 
-            // Recuperamos el pedido "en proceso"
             Pedido pedido = pedidosEnProceso.get(chatId);
             if (pedido == null) {
                 enviarRespuesta(chatId, "Ups, hubo un error. Por favor, inicia tu pedido de nuevo con /realizar_pedido");
                 return;
             }
 
-            // Actualizamos el método de pago
+
             pedido.setMetodoDePago("Transferencia (Comprobante RECIBIDO)");
 
-            // 1. Finalizamos el pedido (le mandamos el texto al admin)
             finalizarPedido(pedido);
 
             ForwardMessage forwardMessage = new ForwardMessage();
@@ -493,12 +478,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             try {
                 execute(forwardMessage);
             } catch (TelegramApiException e) {
-                // Si falla el reenvío, al menos le avisamos al admin
                 enviarRespuesta(Long.parseLong(this.adminChatId),
-                        "El cliente del pedido #" + pedido.getOrderId() + " dice que envió un comprobante, pero no pude reenviártelo. Hablale.");
+                        "El cliente del pedido #" + pedido.getOrderId() + " dice que envió un comprobante, pero no pude reenviártelo. Comunicate con él.");
             }
-
-            // 3. Confirmamos al cliente
             enviarRespuesta(chatId,
                     "¡Comprobante recibido! Tu pedido (ID: #" + pedido.getOrderId() + ") fue confirmado. 🚀 En breve estará listo.");
 
@@ -532,15 +514,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
-    // En TelegramBot.java (reemplazar el método)
+
 
     private void iniciarProcesoDeDireccion(long chatId) {
-        // (Borramos el chequeo del carrito de acá)
 
-        // 1. Poner al usuario en el estado de espera
-        userStates.put(chatId, "AWAITING_ADDRESS"); // Esto ya estaba en el case, pero por seguridad...
+        userStates.put(chatId, "AWAITING_ADDRESS");
 
-        // 2. Pedirle los datos (esto queda igual)
+
         enviarRespuesta(chatId, """
                 ¡Perfecto! Ya casi estamos.
                 
@@ -559,23 +539,21 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         enviarMensaje(msgPlantilla);
     }
-    // En TelegramBot.java (MÉTODO NUEVO)
 
     private void iniciarProcesoDePago(long chatId, String datosCliente) {
-        // 1. Recuperamos el pedido "en proceso" que creamos
+
         Pedido pedido = pedidosEnProceso.get(chatId);
         if (pedido == null) {
             enviarRespuesta(chatId, "Ups, hubo un error con tu carrito. Por favor, inicia de nuevo con /realizar_pedido");
             return;
         }
 
-        // 2. Guardamos los datos del cliente EN el objeto Pedido
+
         pedido.setClientInfo(datosCliente);
 
-        // 3. Ponemos al usuario en estado de espera de pago
         userStates.put(chatId, "AWAITING_PAYMENT_CHOICE");
 
-        // 4. Enviamos los botones de pago
+
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText("¡Datos recibidos! Tu pedido es de $" + pedido.getTotal() + ".\n\n¿Cómo querés abonar?");
@@ -624,12 +602,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                 InlineKeyboardButton btn = new InlineKeyboardButton();
 
                 btn.setText(String.format("🗑️ %dx %s (Restar 1)", cantidad, p.getNombre()));
-                btn.setCallbackData("REM_" + p.getId()); // "REM_PIZ001"
+                btn.setCallbackData("REM_" + p.getId());
                 keyboard.add(List.of(btn));
             }
         }
 
-        // Botón para volver al carrito (para ver el total)
+
         InlineKeyboardButton backBtn = new InlineKeyboardButton();
         backBtn.setText("⬅️ Volver al Carrito");
         backBtn.setCallbackData("VER_CARRITO");
@@ -645,23 +623,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    // En TelegramBot.java (reemplazar el método)
 
-    /**
-     * Proceso final: Mueve el Pedido de "en proceso" a "pendiente" y notifica.
-     * Este método AHORA recibe el objeto Pedido completo.
-     */
     private void finalizarPedido(Pedido pedido) {
 
-        // 1. Generar el ID de Pedido REAL
+
         String orderId = String.valueOf(orderCounter.incrementAndGet());
         pedido.setOrderId(orderId);
 
-        // 2. Mover el pedido de "en proceso" a "pendiente de entrega"
         pedidosPendientes.put(orderId, pedido);
-        pedidosEnProceso.remove(pedido.getClientChatId()); // Limpiamos el mapa "en proceso"
-
-        // 3. Armar el mensaje para el ADMIN (¡ahora con método de pago!)
+        pedidosEnProceso.remove(pedido.getClientChatId());
         StringBuilder sbPedido = new StringBuilder();
         for (Map.Entry<String, Integer> entry : pedido.getItems().entrySet()) {
             String prodNombre = menuService.getProducto(entry.getKey())
@@ -676,7 +646,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         "%s\n" +
                         "(Chat ID: %d)\n\n" +
                         "== MÉTODO DE PAGO ==\n" +
-                        "%s\n\n" + // <-- ¡LA NOVEDAD!
+                        "%s\n\n" +
                         "== PEDIDO ==\n" +
                         "%s" +
                         "---------------------------\n" +
@@ -684,16 +654,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 pedido.getOrderId(),
                 pedido.getClientInfo(),
                 pedido.getClientChatId(),
-                pedido.getMetodoDePago(), // <-- ¡LA NOVEDAD!
+                pedido.getMetodoDePago(),
                 sbPedido.toString(),
                 pedido.getTotal()
         );
 
         enviarRespuesta(Long.parseLong(this.adminChatId), msgAdmin);
 
-        // 4. Confirmar al CLIENTE
-        // (Si es transferencia, le mandamos los datos en el Callback,
-        //  así que solo confirmamos si es efectivo)
+
         if (pedido.getMetodoDePago().startsWith("Efectivo")) {
             enviarRespuesta(pedido.getClientChatId(),
                     "¡Tu pedido (ID: #" + orderId + ") fue recibido! 🚀 " +
@@ -736,11 +704,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        // Botones de Categorías
+
         for (Categoria cat : menuService.getMenu().getCategorias()) {
             InlineKeyboardButton btn = new InlineKeyboardButton();
             btn.setText(cat.getNombre());
-            // Formato: "ACCION:IDCATEGORIA"
+
             btn.setCallbackData("CAT:" + cat.getId());
             keyboard.add(List.of(btn));
         }
@@ -755,7 +723,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void enviarMenuProductos(long chatId, long messageId, String catId) {
-        // Buscamos la categoría
+
         Categoria categoria = menuService.getMenu().getCategorias().stream()
                 .filter(c -> c.getId().equals(catId))
                 .findFirst().orElse(null);
@@ -777,7 +745,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         for (Producto prod : categoria.getProductos()) {
             InlineKeyboardButton btn = new InlineKeyboardButton();
             btn.setText(prod.getNombre() + " ($" + prod.getPrecio() + ")");
-            btn.setCallbackData("PROD:" + catId + ":" + prod.getId()); //
+            btn.setCallbackData("PROD:" + catId + ":" + prod.getId());
             keyboard.add(List.of(btn));
         }
 
@@ -797,7 +765,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-// En TelegramBot.java
+
 
     private void mostrarCarrito(long chatId) {
         Map<String, Integer> carrito = cartService.getCart(chatId);
@@ -825,30 +793,29 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
         sb.append(String.format("\nTOTAL: $%.2f", total));
 
-        // --- ESTA ES LA PARTE QUE TE FALTA ---
-        // Construimos un mensaje CON BOTONES
-        SendMessage message = new SendMessage(); // No es new SendMessage(chatId, sb.toString())
+
+        SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
-        message.setText(sb.toString()); // Ponemos el texto del carrito
+        message.setText(sb.toString());
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        // Botón de Confirmar Pedido
+
         InlineKeyboardButton confirmBtn = new InlineKeyboardButton();
         confirmBtn.setText("✅ Confirmar Pedido");
         confirmBtn.setCallbackData("CONFIRM_ORDER");
 
-        // Botón de Editar Carrito
+
         InlineKeyboardButton editBtn = new InlineKeyboardButton();
         editBtn.setText("✏️ Editar Carrito");
         editBtn.setCallbackData("EDIT_CART");
 
         keyboard.add(List.of(confirmBtn, editBtn));
         markup.setKeyboard(keyboard);
-        message.setReplyMarkup(markup); // <-- Adjuntamos los botones al mensaje
+        message.setReplyMarkup(markup);
 
-        enviarMensaje(message); // Y lo enviamos
+        enviarMensaje(message);
     }
     private boolean handleAdminCommands(long chatId, String text) {
 
@@ -878,20 +845,20 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
         if (text.startsWith("/cerrar")) {
-            // ... (esto queda igual) ...
+
             isStoreOpen = false;
             enviarRespuesta(chatId, "✅ Tienda CERRADA.");
             return true;
         }
 
         if (text.startsWith("/abrir")) {
-            // ... (esto queda igual) ...
+
             isStoreOpen = true;
             enviarRespuesta(chatId, "✅ ¡Tienda ABIERTA!");
             return true;
         }
 
-        // --- IDEA 2: /avisar AHORA CANCELA ---
+
         if (text.startsWith("/avisar")) {
             String[] parts = text.split(" ", 3);
             if (parts.length == 3) {
@@ -902,7 +869,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 Pedido pedido = pedidosPendientes.get(orderId);
 
                 if (pedido != null) {
-                    // 2. ¡LO ENCONTRAMOS! Le mandamos el aviso + cancelación.
+
                     String header = "⚠️ ¡Atención! Mensaje del local sobre tu pedido #" + orderId + ":\n\n";
                     String footer = "\n\nDebido a este inconveniente, tu pedido ha sido CANCELADO. " +
                             "Por favor, realiza un nuevo pedido usando /realizar_pedido.";
@@ -912,7 +879,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                     enviarRespuesta(chatId, "✅ Mensaje enviado y pedido #" + orderId + " CANCELADO.");
 
-                    // 4. LO BORRAMOS DE PENDIENTES
+
                     pedidosPendientes.remove(orderId);
 
                 } else {
@@ -924,13 +891,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             return true;
         }
 
-        // --- LÓGICA DE /listo (ACTUALIZADA) ---
+
         if (text.startsWith("/listo")) {
             String[] parts = text.split(" ", 2);
             if (parts.length == 2) {
                 String orderId = parts[1].replace("#", "");
 
-                // 1. Buscamos el PEDIDO
+
                 Pedido pedido = pedidosPendientes.get(orderId);
 
                 if (pedido != null) {
@@ -947,7 +914,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             return true;
         }
 
-        // --- IDEA 1: /pedidos CON DETALLE ---
         if (text.equals("/pedidos")) {
             if (pedidosPendientes.isEmpty()) {
                 enviarRespuesta(chatId, "No hay pedidos pendientes.");
@@ -957,7 +923,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sb.append(String.format("--- ID: #%s ---\n", pedido.getOrderId()));
                     sb.append("Cliente:\n").append(pedido.getClientInfo()).append("\n");
 
-                    // --- LÍNEA NUEVA ---
                     sb.append("Pago: ").append(pedido.getMetodoDePago()).append("\n");
 
                     sb.append("Items:\n");

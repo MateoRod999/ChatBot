@@ -3,10 +3,7 @@ package com.SilverSorgo.ChatBot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
-
 import jakarta.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -45,12 +42,12 @@ public class MenuService {
             for (Producto prod : cat.getProductos()) { //Lo mismo que lo anterior pero con productos
                 sb.append("  - ").append(prod.getNombre()).append(": ").append(prod.getDescripcion()).append(" ($").append(prod.getPrecio()).append(")\n");
             }
-            sb.append("\n"); //Agrego salto de linea meramente estetico
+            sb.append("\n"); //Agrego salto de linea meramente estético
         }
         return sb.toString();
     }
 
     public Optional<Producto> getProducto(String productId) { //Una variable Optional que contiene al producto, para que al buscar un producto no se crashee si no encuentra o no existe el producto
-        return menu.getCategorias().stream().flatMap(cat -> cat.getProductos().stream()).filter(prod -> prod.getId().equals(productId)).findFirst(); // Vaciá todos los productos de todas las categorías en una sola fila, busca por su ID y devuelve el primero.
+        return menu.getCategorias().stream().flatMap(cat -> cat.getProductos().stream()).filter(prod -> prod.getId().equals(productId)).findFirst(); // Vacía todos los productos de todas las categorías en una sola fila, busca por su ID y devuelve el primero.
     }
 }
