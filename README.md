@@ -1,276 +1,134 @@
-📦 Bot de Pedidos para Telegram – README Oficial
+🛒 Bot de Pedidos para Telegram — Sistema de Gestión de Pedidos con Java
 
-Un bot de Telegram completamente funcional para la gestión de pedidos gastronómicos.
-Incluye menú dinámico, carrito por usuario, flujo de datos del cliente, métodos de pago y panel administrativo.
+Un Bot de Telegram desarrollado en Java y Spring Boot, diseñado para gestionar pedidos gastronómicos mediante menús interactivos, carrito inteligente, mensajes guiados y panel administrativo.
+Incluye un flujo completo desde la selección de productos hasta la confirmación del pedido, con manejo de estados y arquitectura modular.
 
-📘 Índice
+🚀 Características Principales
+🧾 Menú Interactivo Completo
 
-Características principales
+El bot permite navegar categorías, ver productos y agregarlos al carrito mediante botones inline totalmente interactivos.
 
-Arquitectura del sistema
+🍔 Selección por categorías
 
-Diagrama de clases
+🧃 Productos con precio
 
-Descripción de módulos
+➕ Cantidades ajustables
 
-Flujo del usuario
+🛒 Carrito persistente por usuario
 
-Flujo del administrador
+🛍️ Carrito Inteligente
 
-Estados del bot (FSM)
+Cada usuario posee un carrito propio almacenado en memoria:
 
-Persistencia
+🟢 Agregar productos
 
-Seguridad
+🔄 Modificar cantidades
 
-Dependencias
+🗑️ Eliminar productos
 
-Posibles mejoras
+📦 Confirmar pedido
 
-Cómo ejecutar el bot
+El bot muestra el total en tiempo real y acompaña el flujo paso a paso.
 
-🚀 Características principales
+🧑‍💻 Panel Administrativo
 
-📱 Interfaz con teclados inline
+Incluye comandos exclusivos para el administrador:
 
-🛒 Carrito por usuario con edición
-
-🍽️ Menú dinámico por categorías
-
-👤 Flujo completo: menú → carrito → datos → pago → confirmación
-
-👨‍💼 Panel de administración
-
-🔄 Sistema de estados FSM
-
-📦 Gestión de pedidos pendientes
-
-🧠 Arquitectura lista para integrar IA
-
-🧱 Arquitectura del sistema
-
-El bot está construido sobre:
-
-TelegramLongPollingBot
-
-Servicios propios (MenuService, CartService)
-
-Modelos (Producto, Pedido, Categoría)
-
-Mapas en memoria para persistencia temporal
-
-Callbacks como interfaz interactiva
-
-FSM para controlar el flujo de cada usuario
-
-🖼️ Diagrama de Clases
-
-
-![Diagrama de Clases](<img width="1943" height="1296" alt="VLPDajis4zth55sp-QYoHv-TfMfAPLapIIarzYYMd4qgYnROmq4PH3C0E8cSyf6ooX5yiG0a93VrOsqaiL__e5-_9jxuW2wqjHdz3wwlhs71zb5NhKEbl_vhuLVjMpJ9ClAVj6tGOGtAeFVp49pUje6MYkrQVoPu9I16MmgxXe1TU69XSDpQKh6pvE07wU6ViEG_-z-lNuroEIlyewL0K1" src="https://github.com/user-attachments/assets/2bd411a5-df9b-4fba-aaee-a99c060ae371" />
-)
-
-
-📊 Descripción del diagrama
-
-El diagrama muestra claramente:
-
-🔹 1. La clase principal TelegramBot
-
-Hereda de TelegramLongPollingBot
-
-Usa:
-
-MenuService
-
-CartService
-
-ChatClient (IA)
-
-Gestiona:
-
-Estados por usuario
-
-Carritos
-
-Pedidos en proceso
-
-Pedidos pendientes
-
-Callbacks y mensajes
-
-🔹 2. MenuService
-
-Responsable del menú y categorías.
-
-🔹 3. CartService
-
-Encargado del carrito por usuario.
-
-🔹 4. Modelos
-
-Menu
-
-Categoria
-
-Producto
-
-Pedido
-
-🔹 5. Librerías externas
-
-TelegramBots API
-
-ChatClient (LLM)
-
-Update (Telegram)
-
-En conjunto, el diagrama refleja la arquitectura modular y escalable del bot.
-
-🧩 Descripción detallada de cada módulo
-🔹 TelegramBot.java
-
-Core del sistema. Maneja todo el flujo:
-
-Mensajes / callbacks
-
-Carrito
-
-Datos del cliente
-
-Métodos de pago
-
-Administración
-
-🔹 MenuService.java
-
-Carga el menú inicial y permite consultar categorías/productos.
-
-Funciones:
-
-cargarMenu()
-
-getMenuComoTexto()
-
-getProductoPorId()
-
-🔹 CartService.java
-
-Carrito personalizado por usuario.
-
-Métodos:
-
-addItem()
-
-clearCart()
-
-getCart()
-
-removeItem()
-
-🔹 Pedido.java
-
-Modelo del pedido final.
-
-Atributos:
-
-orderId
-
-clientChatId
-
-items
-
-total
-
-metodoDePago
-
-direccion
-
-🧭 Flujo del usuario
-/realizar_pedido
-    ↓
-Categorías
-    ↓
-Productos
-    ↓
-Carrito (ver/editar/confirmar)
-    ↓
-Datos personales
-    ↓
-Método de pago
-    ↓
-Pedido finalizado → Admin + Cliente
-
-🧭 Flujo del Administrador
 Comando	Función
-/abrir	Habilita pedidos
-/cerrar	Bloquea pedidos
+/abrir	Abre la tienda
+/cerrar	Cierra la tienda
 /pedidos	Lista pedidos pendientes
-/listo ID	Marca pedido como listo
-/avisar ID mensaje	Notifica al cliente y cancela el pedido
-🔄 Sistema de Estados (FSM)
-NONE
-AWAITING_CLIENT_DATA
-AWAITING_PAYMENT_CHOICE
-ORDER_CONFIRMED
+/listo <ID>	Marca un pedido como completado
+/avisar <ID> <msg>	Notifica al cliente y cancela el pedido
 
+Se gestiona desde Telegram sin necesidad de backend adicional.
 
-Controlan el flujo del usuario para evitar inconsistencias.
+📝 Flujo Guiado del Cliente
 
-💽 Persistencia
+El proceso es completamente intuitivo:
 
-Se usan Maps en memoria:
+🧾 Selección del menú
 
-Carrito por usuario
+🛒 Construcción del carrito
 
-Pedido en proceso
+📄 Ingreso de datos del cliente
 
-Pedido pendiente
+💳 Selección del método de pago
 
-Estado del usuario
+📬 Confirmación final
 
-Fácil de reemplazar por base de datos.
+El sistema utiliza un FSM (Finite State Machine) para asegurar que el cliente no pueda saltar pasos.
 
-🔒 Seguridad
+🧠 Funcionamiento Interno
 
-Admin con chatId fijo
+El bot se compone de servicios independientes y modelos bien definidos:
 
-Callbacks controlados por prefijos
+Componente	Función
+TelegramBot	Núcleo del bot. Maneja mensajes, callbacks y estados
+MenuService	Carga y administra el menú, categorías y productos
+CartService	Administra el carrito por usuario
+Pedido	Modelo del pedido del cliente
+ChatClient (opcional)	Integración con IA para respuestas contextualizadas
+🏗️ Estructura del Proyecto
+src/
+└── main/
+    ├── java/
+    │   └── com.tubot.telegram/
+    │       ├── bot/
+    │       │   └── TelegramBot.java
+    │       ├── model/
+    │       │   ├── Pedido.java
+    │       │   ├── Producto.java
+    │       │   └── Categoria.java
+    │       ├── service/
+    │       │   ├── MenuService.java
+    │       │   └── CartService.java
+    │       └── BotApplication.java
+    └── resources/
+        └── application.properties
 
-Sin persistencia de datos sensibles
+🛠️ Tecnologías Utilizadas
 
-Flujo guiado con FSM
+☕ Java 17+
 
-🛠️ Dependencias necesarias
-telegrambots
-telegrambotsextensions
-google-genai (opcional)
+🍃 Spring Boot
 
-🌱 Posibles mejoras futuras
+💬 Telegram Bot API
 
-Base de datos real
+📄 JSON / Maps en memoria
 
-Panel web
+🤖 IA opcional (ChatClient)
 
-Integración completa con IA
+💾 Persistencia
 
-MercadoPago / QR
+No utiliza base de datos.
+Los datos se almacenan temporalmente en memoria:
 
-Multi-sucursal
+🛒 Carritos por usuario
 
-Registro persistente de pedidos
+📦 Pedidos en proceso
 
-▶️ Cómo ejecutar el bot
-git clone https://github.com/usuario/repositorio.git
+🧾 Pedidos pendientes
 
+🔄 Estados del usuario
 
-Insertar tu token de Telegram:
+Esto permite un despliegue muy simple y sin infraestructura adicional.
 
-@Override
-public String getBotToken() {
-    return "TOKEN_AQUÍ";
-}
+🔐 Seguridad
 
+El administrador está identificado por un chatId único configurable
 
-Ejecutar:
+Los comandos críticos son solo para admin
 
-mvn spring-boot:run
+Los callbacks usan formato controlado (CAT:, PROD:, PAY:…) evitando manipulaciones
+
+No se guarda información sensible fuera de la sesión
+
+📊 Diagrama de Clases
+
+Incluye la arquitectura completa del sistema según tu diseño UML.
+
+📌 Colocá la imagen en la raíz del proyecto con el nombre:
+diagrama_bot.png
+
+![Diagrama de Clases](https://imgur.com/a/pSRlORl)
