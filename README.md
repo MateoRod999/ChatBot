@@ -200,7 +200,7 @@ El bot mantiene estados para cada usuario:
 
 ## 📊 Diagrama de Clases
 
-![Diagrama de Clases](Diagrama de clases.png)
+![Diagrama de Clases](ChatBot/Diagrama de clases.png)
 
 El proyecto está estructurado con las siguientes clases principales:
 - **TelegramBot**: Controlador principal del bot
